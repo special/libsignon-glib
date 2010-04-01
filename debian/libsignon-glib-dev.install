@@ -1,0 +1,4 @@
+usr/lib/libsignon-glib.a
+usr/lib/libsignon-glib.so
+usr/lib/pkgconfig/libsignon-glib.pc
+usr/include/libsignon-glib/*

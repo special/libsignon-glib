@@ -4,7 +4,16 @@ aclocal.m4
 compile
 config.*
 configure
-debian
+/debian/files
+/debian/libsignon-glib-dev/
+/debian/libsignon-glib-doc/
+/debian/libsignon-glib0-dbg/
+/debian/libsignon-glib0.postinst.debhelper
+/debian/libsignon-glib0.postrm.debhelper
+/debian/libsignon-glib0.substvars
+/debian/libsignon-glib0/
+/debian/stamp-*
+/debian/tmp/
 depcomp
 .*
 *.o

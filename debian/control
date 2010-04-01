@@ -1,0 +1,52 @@
+Source: libsignon-glib
+Priority: optional
+Maintainer: Alberto Mardegan <alberto-mardegan@nokia.com>
+Build-Depends: debhelper (>= 4.1.0),
+               cdbs,
+               check,
+               gtk-doc-tools,
+               libglib2.0-dev,
+               libdbus-1-dev,
+               libdbus-glib-1-dev
+Standards-Version: 3.6.0
+
+Package: libsignon-glib0
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:depends}
+Description: Maemo SignOn library (glib)
+ A low-level library for managing account credentials.
+
+Package: libsignon-glib0-dbg
+Architecture: any
+Section: libdevel
+Depends: libsignon-glib0 (= ${binary:Version})
+Description: Maemo SignOn library (glib). Debug symbols
+ A low-level library for managing account credentials.
+ .
+ This package contains the debugging symbols.
+
+Package: libsignon-glib-dev
+Architecture: any
+Section: libdevel
+Depends: libsignon-glib0 (= ${binary:Version})
+Description: Development files for the Maemo SignOn library (glib)
+ A low-level library for managing account credentials.
+ .
+ Contains the header files and static libraries
+
+Package: libsignon-glib-doc
+Architecture: all
+Section: doc
+Description: Documentation for the Maemo SignOn library (glib)
+ A low-level library for managing account credentials.
+ .
+ Contains the library reference
+
+Package: libsignon-glib0-test
+Architecture: any
+Section: libdevel
+Depends: ${shlibs:Depends}, ci-testing
+XB-Maemo-CI-Packages: libsignon-glib0
+XB-Maemo-CI-Stage: staging, acceptance
+Description: Tests for signon-glib
