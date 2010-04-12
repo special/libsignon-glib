@@ -13,7 +13,7 @@ Standards-Version: 3.6.0
 Package: libsignon-glib0
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}, ${misc:depends}
+Depends: ${shlibs:Depends}, ${misc:depends}, signond0
 Description: Maemo SignOn library (glib)
  A low-level library for managing account credentials.
 
@@ -46,7 +46,7 @@ Description: Documentation for the Maemo SignOn library (glib)
 Package: libsignon-glib0-test
 Architecture: any
 Section: libdevel
-Depends: ${shlibs:Depends}, ci-testing
+Depends: ${shlibs:Depends}, ci-testing, signon-test-plugins
 XB-Maemo-CI-Packages: libsignon-glib0
 XB-Maemo-CI-Stage: staging, acceptance
 Description: Tests for signon-glib
