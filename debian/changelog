@@ -1,3 +1,9 @@
+libsignon-glib (0.1.9) unstable; urgency=low
+
+  * Implemented: ASSOH-447 (partially)
+
+ -- Alexander Akimov <ext-alexander.akimov@nokia.com>  Fri, 16 Apr 2010 11:01:54 +0200
+
 libsignon-glib (0.1.8) unstable; urgency=low
 
   * Fixes: NB#163667 - MemLeak libsignon-glib-0.1.7+0m6 signon-identity.c
