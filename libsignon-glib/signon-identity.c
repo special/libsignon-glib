@@ -79,6 +79,25 @@ typedef struct _IdentityStoreCredentialsData
     gpointer cb_data;
 } IdentityStoreCredentialsData;
 
+enum {
+    SIGNON_VERIFY_USER,
+    SIGNON_VERIFY_SECRET
+};
+
+typedef struct _IdentityVerifyCbData
+{
+    SignonIdentity *self;
+    SignonIdentityVerifyCb cb;
+    gpointer user_data;
+} IdentityVerifyCbData;
+
+typedef struct _IdentityVerifyData
+{
+    gchar *data_to_send;
+    gboolean verify_secret;
+    gpointer cb_data;
+} IdentityVerifyData;
+
 typedef struct _IdentityStoreCredentialsCbData
 {
     SignonIdentity *self;
@@ -87,12 +106,18 @@ typedef struct _IdentityStoreCredentialsCbData
 } IdentityStoreCredentialsCbData;
 
 static void identity_info_free (SignonIdentityInfo *identity_info);
-static void identity_registered (SignonIdentity *identity, DBusGProxy *proxy, char *object_path, GPtrArray *identity_array, GError *error);
+static void identity_registered (SignonIdentity *identity, DBusGProxy *proxy, char *object_path,
+                                 GPtrArray *identity_array, GError *error);
 static void identity_new_cb (DBusGProxy *proxy, char *objectPath, GError *error, gpointer userdata);
-static void identity_new_from_db_cb (DBusGProxy *proxy, char *objectPath, GPtrArray *identityData, GError *error, gpointer userdata);
+static void identity_new_from_db_cb (DBusGProxy *proxy, char *objectPath, GPtrArray *identityData,
+                                      GError *error, gpointer userdata);
 static void identity_store_credentials_ready_cb (gpointer object, const GError *error, gpointer user_data);
 static void identity_store_credentials_reply (DBusGProxy *proxy, guint id, GError *error, gpointer userdata);
-static void identity_session_object_destroyed_cb(gpointer data, GObject *where_the_session_was);
+static void identity_session_object_destroyed_cb (gpointer data, GObject *where_the_session_was);
+static void identity_verify_data (SignonIdentity *self, const gchar *data_to_send, gboolean verify_secret,
+                                    SignonIdentityVerifyCb cb, gpointer user_data);
+static void identity_verify_ready_cb (gpointer object, const GError *error, gpointer user_data);
+static void identity_verify_reply (DBusGProxy *proxy, gboolean valid, GError *error, gpointer userdata);
 
 
 static GQuark
@@ -522,9 +547,8 @@ void signon_identity_store_credentials_with_info(SignonIdentity *self,
  * @cb: callback
  * @user_data : user_data.
  *
- * Construct an identity object associated with an existing identity record.
- * Returns: an instance of an #SignonIdentity.
- */
+ * Stores the given identity into credentials DB
+  */
 void signon_identity_store_credentials_with_args(SignonIdentity *self,
                                                  const gchar *username,
                                                  const gchar *secret,
@@ -694,4 +718,153 @@ identity_store_credentials_reply (DBusGProxy *proxy,
 
     g_clear_error(&new_error);
     g_slice_free (IdentityStoreCredentialsCbData, cb_data);
+}
+
+static void
+identity_verify_reply (DBusGProxy *proxy,
+                       gboolean valid,
+                       GError *error,
+                       gpointer userdata)
+{
+    GError *new_error = NULL;
+    IdentityVerifyCbData *cb_data = (IdentityVerifyCbData *)userdata;
+
+    g_return_if_fail (cb_data != NULL);
+    g_return_if_fail (cb_data->self != NULL);
+
+    new_error = _signon_errors_get_error_from_dbus (error);
+
+    (cb_data->cb)
+        (cb_data->self, valid, new_error, cb_data->user_data);
+
+    g_clear_error(&new_error);
+    g_slice_free (IdentityVerifyCbData, cb_data);
+}
+
+
+static void
+identity_verify_ready_cb (gpointer object, const GError *error, gpointer user_data)
+{
+    g_return_if_fail (SIGNON_IS_IDENTITY (object));
+
+    SignonIdentity *self = SIGNON_IDENTITY (object);
+    SignonIdentityPrivate *priv = self->priv;
+    g_return_if_fail (priv != NULL);
+
+    DEBUG ("%s %d", G_STRFUNC, __LINE__);
+
+    IdentityVerifyData *operation_data =
+        (IdentityVerifyData *)user_data;
+    g_return_if_fail (operation_data != NULL);
+
+    IdentityVerifyCbData *cb_data = operation_data->cb_data;
+    g_return_if_fail (cb_data != NULL);
+
+    if (error)
+    {
+        DEBUG ("IdentityError: %s", error->message);
+
+        (cb_data->cb)
+            (self, FALSE, error, cb_data->user_data);
+
+        g_slice_free (IdentityVerifyCbData, cb_data);
+    }
+    else if (priv->proxy)
+    {
+        DEBUG ("%s %d", G_STRFUNC, __LINE__);
+
+        if (operation_data->verify_secret == SIGNON_VERIFY_SECRET)
+            com_nokia_singlesignon_SignonIdentity_verify_secret_async(
+                    priv->proxy,
+                    operation_data->data_to_send,
+                    identity_verify_reply,
+                    cb_data);
+        else if (operation_data->verify_secret == SIGNON_VERIFY_USER)
+            com_nokia_singlesignon_SignonIdentity_verify_user_async(
+                    priv->proxy,
+                    operation_data->data_to_send,
+                    identity_verify_reply,
+                    cb_data);
+    }
+    else if (!priv->proxy)
+    {
+        g_critical ("IdentityError: proxy is not initialized but error is NULL");
+    }
+
+    g_free (operation_data->data_to_send);
+    g_slice_free (IdentityVerifyData, operation_data);
+}
+
+
+static void
+identity_verify_data(SignonIdentity *self,
+                     const gchar *data_to_send,
+                     gboolean verify_secret,
+                     SignonIdentityVerifyCb cb,
+                     gpointer user_data)
+{
+    g_return_if_fail (SIGNON_IS_IDENTITY (self));
+
+    SignonIdentityPrivate *priv = self->priv;
+    g_return_if_fail (priv != NULL);
+
+    DEBUG ("%s %d", G_STRFUNC, __LINE__);
+
+    IdentityVerifyCbData *cb_data = g_slice_new0 (IdentityVerifyCbData);
+    cb_data->self = self;
+    cb_data->cb = cb;
+    cb_data->user_data = user_data;
+
+    IdentityVerifyData *operation_data = g_slice_new0 (IdentityVerifyData);
+
+    operation_data->data_to_send = g_strdup (data_to_send);
+    operation_data->verify_secret = verify_secret;
+    operation_data->cb_data = cb_data;
+
+    _signon_object_call_when_ready (self,
+                                    identity_object_quark(),
+                                    identity_verify_ready_cb,
+                                    operation_data);
+}
+
+/**
+ * sigon_identity_verify_user:
+ * @message: message.
+ * @cb: callback
+ * @user_data : user_data.
+ *
+ * Verifies the given username
+ * gboolean result: is verified or not
+ */
+void sigon_identity_verify_user(SignonIdentity *self,
+                                const gchar *message,
+                                SignonIdentityVerifyCb cb,
+                                gpointer user_data)
+{
+    identity_verify_data (self,
+                          message,
+                          SIGNON_VERIFY_USER,
+                          cb,
+                          user_data);
+}
+
+/**
+ * sigon_identity_verify_secret:
+ * @message: secret.
+ * @cb: callback
+ * @user_data : user_data.
+ *
+ * Verifies the given secret
+ * gboolean result: is verified or not
+ */
+void sigon_identity_verify_secret(SignonIdentity *self,
+                                  const gchar *secret,
+                                  SignonIdentityVerifyCb cb,
+                                  gpointer user_data)
+{
+    identity_verify_data (self,
+                          secret,
+                          SIGNON_VERIFY_SECRET,
+                          cb,
+                          user_data);
 }
