@@ -41,6 +41,7 @@ G_BEGIN_DECLS
 typedef struct _SignonIdentityClass SignonIdentityClass;
 typedef struct _SignonIdentityPrivate SignonIdentityPrivate;
 typedef struct _SignonIdentity SignonIdentity;
+typedef struct _SignonIdentityInfo SignonIdentityInfo;
 
 struct _SignonIdentityClass
 {
@@ -53,27 +54,30 @@ struct _SignonIdentity
     SignonIdentityPrivate *priv;
 };
 
+typedef void (*SignonIdentityVoidCb) (SignonIdentity *self,
+                                      const GError *error,
+                                      gpointer user_data);
 
-typedef struct _SignonIdentityInfo
-{
-    gchar *user_name;
-    gchar *password;
-    gchar *caption;
-} SignonIdentityInfo;
+typedef SignonIdentityVoidCb SignonIdentityRemovedCb;
+typedef SignonIdentityVoidCb SignonIdentitySignedOutCb;
 
-enum _SignonTypes {
+/*
+ * types used in SignonIdentityInfo
+ * */
+enum _SignonIdentityType {
     SIGNON_TYPE_OTHER = 0,
     SIGNON_TYPE_APP = 1 << 0,
     SIGNON_TYPE_WEB = 1 << 1,
     SIGNON_TYPE_NETWORK = 1 << 2
 };
 
+typedef enum _SignonIdentityType SignonIdentityType;
+
 GType signon_identity_get_type (void) G_GNUC_CONST;
 
 SignonIdentity *signon_identity_new_from_db (guint32 id);
 SignonIdentity *signon_identity_new ();
 
-gchar *signon_identity_get_username (SignonIdentity *identity);
 GError *signon_identity_get_last_error (SignonIdentity *identity);
 
 SignonAuthSession *signon_identity_create_session(SignonIdentity *self,
@@ -94,11 +98,6 @@ typedef void (*SignonIdentityStoreCredentialsCb) (SignonIdentity *self,
  * */
 void signon_identity_store_credentials_with_info(SignonIdentity *self,
                                                  const SignonIdentityInfo *info,
-                                                 const gboolean store_secret,
-                                                 const GHashTable *methods,
-                                                 const gchar **realms,
-                                                 const gchar **access_control_list,
-                                                 const gint type,
                                                  SignonIdentityStoreCredentialsCb cb,
                                                  gpointer user_data);
 
@@ -113,9 +112,9 @@ void signon_identity_store_credentials_with_args(SignonIdentity *self,
                                                  const gboolean store_secret,
                                                  const GHashTable *methods,
                                                  const gchar *caption,
-                                                 const gchar **realms,
-                                                 const gchar **access_control_list,
-                                                 const gint type,
+                                                 const gchar* const *realms,
+                                                 const gchar* const *access_control_list,
+                                                 SignonIdentityType type,
                                                  SignonIdentityStoreCredentialsCb cb,
                                                  gpointer user_data);
 
@@ -124,15 +123,70 @@ typedef void (*SignonIdentityVerifyCb) (SignonIdentity *self,
                                         const GError *error,
                                         gpointer user_data);
 
-void sigon_identity_verify_user(SignonIdentity *self,
+void signon_identity_verify_user(SignonIdentity *self,
                                 const gchar *message,
                                 SignonIdentityVerifyCb cb,
                                 gpointer user_data);
 
-void sigon_identity_verify_secret(SignonIdentity *self,
+void signon_identity_verify_secret(SignonIdentity *self,
                                   const gchar *secret,
                                   SignonIdentityVerifyCb cb,
                                   gpointer user_data);
+
+typedef void (*SignonIdentityInfoCb) (SignonIdentity *self,
+                                      const SignonIdentityInfo *info,
+                                      const GError *error,
+                                      gpointer user_data);
+
+void signon_identity_query_info(SignonIdentity *self,
+                               SignonIdentityInfoCb cb,
+                               gpointer user_data);
+
+void signon_identity_remove(SignonIdentity *self,
+                           SignonIdentityRemovedCb cb,
+                           gpointer user_data);
+
+void signon_identity_signout(SignonIdentity *self,
+                            SignonIdentitySignedOutCb cb,
+                            gpointer user_data);
+
+SignonIdentityInfo *signon_identity_info_new ();
+
+void signon_identity_info_free (SignonIdentityInfo *info);
+
+SignonIdentityInfo *signon_identity_info_copy (const SignonIdentityInfo *other);
+
+gint signon_identity_info_get_id (const SignonIdentityInfo *info);
+
+const gchar *signon_identity_info_get_username (const SignonIdentityInfo *info);
+
+gboolean signon_identity_info_get_storing_secret (const SignonIdentityInfo *info);
+
+const gchar *signon_identity_info_get_caption (const SignonIdentityInfo *info);
+
+const GHashTable *signon_identity_info_get_methods (const SignonIdentityInfo *info);
+
+const gchar* const *signon_identity_info_get_realms (const SignonIdentityInfo *info);
+
+const gchar* const *signon_identity_info_get_access_control_list (const SignonIdentityInfo *info);
+
+SignonIdentityType signon_identity_info_get_type (const SignonIdentityInfo *info);
+
+void signon_identity_info_set_username (SignonIdentityInfo *info, const gchar *username);
+
+void signon_identity_info_set_secret (SignonIdentityInfo *info, const gchar *secret, gboolean store_secret);
+
+void signon_identity_info_set_caption (SignonIdentityInfo *info, const gchar *caption);
+
+void signon_identity_info_set_method (SignonIdentityInfo *info, const gchar *method, const gchar* const *mechanisms);
+
+void signon_identity_info_remove_method (SignonIdentityInfo *info, const gchar *method);
+
+void signon_identity_info_set_realms (SignonIdentityInfo *info, const gchar* const *realms);
+
+void signon_identity_info_set_access_control_list (SignonIdentityInfo *info, const gchar* const *access_control_list);
+
+void signon_identity_info_set_type (SignonIdentityInfo *info, SignonIdentityType type);
 
 G_END_DECLS
 
