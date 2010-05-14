@@ -40,8 +40,6 @@
 #include "signon-utils.h"
 #include "signon-errors.h"
 
-#define SIGNON_IDENTITY_IFACE  "com.nokia.singlesignon.SignonIdentity"
-
 G_DEFINE_TYPE (SignonIdentity, signon_identity, G_TYPE_OBJECT);
 
 enum
@@ -322,7 +320,7 @@ signon_identity_class_init (SignonIdentityClass *klass)
 
     g_type_class_add_private (object_class, sizeof (SignonIdentityPrivate));
 
-    signals[SIGNEDOUT_SIGNAL] = g_signal_new("signon-identity-signout",
+    signals[SIGNEDOUT_SIGNAL] = g_signal_new("signout",
                                     G_TYPE_FROM_CLASS (klass),
                                     G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
                                     0 /* class closure */,
@@ -393,7 +391,7 @@ identity_registered (SignonIdentity *identity, DBusGProxy *proxy,
         g_return_if_fail (priv->proxy == NULL);
 
         priv->proxy = dbus_g_proxy_new_from_proxy (DBUS_G_PROXY (priv->signon_proxy),
-                                                   SIGNON_IDENTITY_IFACE,
+                                                   SIGNOND_IDENTITY_INTERFACE,
                                                    object_path);
 
         dbus_g_object_register_marshaller (g_cclosure_marshal_VOID__INT,
@@ -528,12 +526,9 @@ identity_session_object_destroyed_cb(gpointer data,
 }
 
 /**
- * §:
+ * signon_identity_create_session:
  * @self: self.
  * @method: method.
- * @user_data: user_data.
- * @cb: cb.
- * @user_data: user_data.
  * @error: error.
  *
  * Construct an identity object associated with an existing identity record.
@@ -541,8 +536,6 @@ identity_session_object_destroyed_cb(gpointer data,
  */
 SignonAuthSession *signon_identity_create_session(SignonIdentity *self,
                                                   const gchar *method,
-                                                  SignonAuthSessionStateCahngedCb cb,
-                                                  gpointer user_data,
                                                   GError **error)
 {
     g_return_val_if_fail (SIGNON_IS_IDENTITY (self), NULL);
@@ -554,8 +547,6 @@ SignonAuthSession *signon_identity_create_session(SignonIdentity *self,
 
     SignonAuthSession *session = signon_auth_session_new (priv->id,
                                                           method,
-                                                          cb,
-                                                          user_data,
                                                           error);
     if (session)
     {

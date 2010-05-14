@@ -34,39 +34,8 @@ G_BEGIN_DECLS
 #define SIGNON_SESSION_DATA_SECRET        "Secret"
 #define SIGNON_SESSION_DATA_REALM         "Realm"
 
-enum AuthSessionState {
-    SessionNotStarted = 0,          /**< No message. */
-    HostResolving,                  /**< Resolving remote server host name. */
-    ServerConnecting,               /**< Connecting to remote server. */
-    DataSending,                    /**< Sending data to remote server. */
-    ReplyWaiting,                   /**< Waiting reply from remote server. */
-    UserPending,                    /**< Waiting response from user. */
-    UiRefreshing,                   /**< Refreshing ui request. */
-    ProcessPending,                 /**< Waiting another process to start. */
-    SessionStarted,                 /**< Authentication session is started. */
-    ProcessCanceling,               /**< Canceling.current process: is this really needed??? */
-    ProcessDone,                    /** < ???? Is this really needed > */
-    CustomState,                    /**< Custom message. */
-    MaxState,
-};
-
-typedef enum
-{
-    AS_STATE_NOT_STARTED = 0,           /**< No message. */
-    AS_STATE_HOST_RESOLVING,            /**< Resolving remote server host name. */
-    AS_STATE_SERVER_CONNECTING,         /**< Connecting to remote server. */
-    AS_STATE_DATA_SENDING,              /**< Sending data to remote server. */
-    AS_STATE_DATA_WAITING,              /**< Waiting reply from remote server. */
-    AS_STATE_USER_PENDING,
-    AS_STATE_UI_REFRESHING,
-    AS_STATE_PROCESS_PENDING,
-    AS_STATE_SESSION_STARTED,
-    AS_STATE_PROCESS_CANCELLING,
-    AS_STATE_PROCESS_DONE,
-    AS_STATE_CUSTOM_STATE,
-    AS_STATE_MAX_STATE,
-} SessionObjectState;
-
+/* SignonAuthSessionState is defined in signoncommon.h */
+#include <signoncommon.h>
 
 #define SIGNON_TYPE_AUTH_SESSION                 (signon_auth_session_get_type ())
 #define SIGNON_AUTH_SESSION(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), SIGNON_TYPE_AUTH_SESSION, SignonAuthSession))
@@ -83,7 +52,6 @@ struct _SignonAuthSession {
     GObject parent;
 
     SignonAuthSessionPrivate *priv;
-    gboolean dispose_has_run;
 };
 
 struct _SignonAuthSessionClass {
@@ -92,22 +60,11 @@ struct _SignonAuthSessionClass {
 
 GType signon_auth_session_get_type (void) G_GNUC_CONST;
 
-typedef void (*SignonAuthSessionStateCahngedCb) (SignonAuthSession* self,
-                                                 gint state,
-                                                 gchar *message,
-                                                 gpointer user_data);
-
-/*
- * Despite my arguments it was decided to keep this
- * function as public
- * */
 SignonAuthSession *signon_auth_session_new(gint id,
                                            const gchar *method_name,
-                                           SignonAuthSessionStateCahngedCb cb,
-                                           gpointer user_data,
                                            GError **err);
 
-gchar *signon_auth_session_name(SignonAuthSession* self);
+const gchar *signon_auth_session_get_method (SignonAuthSession *self);
 
 typedef void (*SignonAuthSessionQueryAvailableMethodsCb) (SignonAuthSession* self,
                                                           gchar **mechanisms,

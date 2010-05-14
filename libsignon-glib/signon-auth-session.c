@@ -54,6 +54,7 @@ struct _SignonAuthSessionPrivate
 
     gboolean busy;
     gboolean canceled;
+    gboolean dispose_has_run;
 };
 
 typedef struct _AuthSessionQueryAvailableMechanismsData
@@ -145,7 +146,7 @@ signon_auth_session_dispose (GObject *object)
     SignonAuthSessionPrivate *priv = self->priv;
     g_return_if_fail (priv != NULL);
 
-    if (self->dispose_has_run)
+    if (priv->dispose_has_run)
         return;
 
     GError *err = NULL;
@@ -166,7 +167,7 @@ signon_auth_session_dispose (GObject *object)
 
     G_OBJECT_CLASS (signon_auth_session_parent_class)->dispose (object);
 
-    self->dispose_has_run = TRUE;
+    priv->dispose_has_run = TRUE;
 }
 
 static void
@@ -191,7 +192,7 @@ signon_auth_session_class_init (SignonAuthSessionClass *klass)
     g_type_class_add_private (object_class, sizeof (SignonAuthSessionPrivate));
 
     auth_session_signals[STATE_CHANGED] =
-            g_signal_new ("auth_sesson_state_changed",
+            g_signal_new ("state-changed",
                           G_TYPE_FROM_CLASS (klass),
                           G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
                           0,
@@ -209,8 +210,6 @@ signon_auth_session_class_init (SignonAuthSessionClass *klass)
 SignonAuthSession *
 signon_auth_session_new (gint id,
                          const gchar *method_name,
-                         SignonAuthSessionStateCahngedCb cb,
-                         gpointer user_data,
                          GError **err)
 {
     SignonAuthSession *self = SIGNON_AUTH_SESSION(g_object_new (SIGNON_TYPE_AUTH_SESSION, NULL));
@@ -223,14 +222,6 @@ signon_auth_session_new (gint id,
 
         g_object_unref (self);
         return NULL;
-    }
-
-    if (cb)
-    {
-        g_signal_connect (self,
-                          "auth_sesson_state_changed",
-                          G_CALLBACK (cb),
-                          user_data);
     }
 
     return self;
@@ -284,8 +275,8 @@ signon_auth_session_set_id(SignonAuthSession* self,
                                     GINT_TO_POINTER(id));
 }
 
-gchar *
-signon_auth_session_name (SignonAuthSession *self)
+const gchar *
+signon_auth_session_get_method (SignonAuthSession *self)
 {
     g_return_val_if_fail (SIGNON_IS_AUTH_SESSION (self), NULL);
     SignonAuthSessionPrivate *priv = self->priv;
@@ -390,7 +381,7 @@ auth_session_get_object_path_reply (DBusGProxy *proxy, char * object_path,
     else
     {
         priv->proxy = dbus_g_proxy_new_from_proxy (DBUS_G_PROXY (priv->signon_proxy),
-                                                   SIGNON_AUTH_SESSION_IFACE,
+                                                   SIGNOND_AUTH_SESSION_INTERFACE,
                                                    object_path);
 
         dbus_g_object_register_marshaller (signon_marshal_VOID__INT_STRING,
@@ -532,7 +523,7 @@ auth_session_query_available_mechanisms_ready_cb (gpointer object, const GError 
         g_signal_emit (self,
                        auth_session_signals[STATE_CHANGED],
                        0,
-                       (gint)AS_STATE_PROCESS_PENDING,
+                       SIGNON_AUTH_SESSION_STATE_PROCESS_PENDING,
                        auth_session_process_pending_message);
     }
 
@@ -590,7 +581,7 @@ auth_session_process_ready_cb (gpointer object, const GError *error, gpointer us
        g_signal_emit (self,
                        auth_session_signals[STATE_CHANGED],
                        0,
-                       (gint)AS_STATE_PROCESS_PENDING,
+                       SIGNON_AUTH_SESSION_STATE_PROCESS_PENDING,
                        auth_session_process_pending_message);
     }
 
