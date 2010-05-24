@@ -1,0 +1,12 @@
+/libsignon-glib-dev/
+/libsignon-glib-doc/
+/libsignon-glib0/
+/libsignon-glib0-dbg/
+/libsignon-glib0-test/
+
+/files
+/tmp/
+*.debhelper
+*.debhelper.log
+*.substvars
+stamp-*
