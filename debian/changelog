@@ -1,4 +1,4 @@
-libsignon-glib (0.8-1) unstable; urgency=low
+libsignon-glib (0.8-2) unstable; urgency=low
 
   * Improvement of the Signon authentication session creation.
 
