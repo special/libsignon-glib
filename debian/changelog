@@ -1,3 +1,9 @@
+libsignon-glib (0.8-1) unstable; urgency=low
+
+  * Improvement of the Signon authentication session creation.
+
+ -- Aurel Popirtac <ext-aurel.popirtac@nokia.com>  Fri, 11 Jun 2010 15:54:00 +0300
+
 libsignon-glib (0.6-1) unstable; urgency=low
 
   * Soname bump, rename package to libsignon-glib1
