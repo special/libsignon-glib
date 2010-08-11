@@ -48,6 +48,6 @@ Package: libsignon-glib1-test
 Architecture: any
 Section: libdevel
 Depends: ${shlibs:Depends}, ci-testing, signon-test-plugins
-XB-Maemo-CI-Packages: libsignon-glib0
+XB-Maemo-CI-Packages: libsignon-glib1
 XB-Maemo-CI-Stage: staging, acceptance
 Description: Tests for signon-glib
