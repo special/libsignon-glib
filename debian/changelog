@@ -1,3 +1,10 @@
+libsignon-glib (0.13-1) unstable; urgency=low
+
+  Fixes: NB#185404 - libsignon-glib missed updating the DBUS service name in one spot
+  Fixes: NB#187394 - COREWEB: /usr/lib/telepathy/telepathy-sasl-signon 'auth_session_remote_object_destroyed_cb 
+
+ -- Alexander Akimov <ext-alexander.akimo@nokia.com>  Wed, 25 Aug 2010 15:40:50 +0300
+
 libsignon-glib (0.12-1) unstable; urgency=low
 
   * Fix versioning.
