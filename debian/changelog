@@ -1,12 +1,19 @@
+libsignon-glib (0.15-1) unstable; urgency=low
+
+  * Fixes: NB#188172 - libsignon-glib1-test tests fail
+  * Adapt to signon api changes
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Thu, 16 Sep 2010 11:40:50 +0300
+
 libsignon-glib (0.14-1) unstable; urgency=low
 
-  Fixes: NB#187394 - COREWEB: /usr/lib/telepathy/telepathy-sasl-signon 'auth_session_remote_object_destroyed_cb
+  * Fixes: NB#187394 - COREWEB: /usr/lib/telepathy/telepathy-sasl-signon 'auth_session_remote_object_destroyed_cb
 
  -- Alexander Akimov <ext-alexander.akimo@nokia.com>  Wed, 25 Aug 2010 15:40:50 +0300
 
 libsignon-glib (0.13-1) unstable; urgency=low
 
-  Fixes: NB#185404 - libsignon-glib missed updating the DBUS service name in one spot
+  * Fixes: NB#185404 - libsignon-glib missed updating the DBUS service name in one spot
 
  -- Alexander Akimov <ext-alexander.akimo@nokia.com>  Wed, 25 Aug 2010 15:40:50 +0300
 

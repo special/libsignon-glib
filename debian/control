@@ -4,6 +4,7 @@ Maintainer: Alberto Mardegan <alberto-mardegan@nokia.com>
 Build-Depends: debhelper (>= 4.1.0),
                cdbs,
                check,
+               pkg-config,
                gtk-doc-tools,
                libglib2.0-dev,
                libdbus-1-dev,
