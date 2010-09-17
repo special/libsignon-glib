@@ -1,3 +1,9 @@
+libsignon-glib (0.15-2) unstable; urgency=low
+
+  * Fixes: NB#191411 - Source package 'libsignon-glib' interfaces not frozen in 0.2010.36-5
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Thu, 16 Sep 2010 11:40:50 +0300
+
 libsignon-glib (0.15-1) unstable; urgency=low
 
   * Fixes: NB#188172 - libsignon-glib1-test tests fail
