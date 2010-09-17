@@ -117,7 +117,6 @@ typedef struct _IdentityStoreCredentialsData
     gchar **realms;
     gchar **access_control_list;
     gint type;
-    gint ref_count;
     gpointer cb_data;
 } IdentityStoreCredentialsData;
 
@@ -696,7 +695,6 @@ void signon_identity_store_credentials_with_info(SignonIdentity *self,
                                                 (const gchar* const *)info->realms,
                                                 (const gchar* const *)info->access_control_list,
                                                 info->type,
-                                                info->ref_count,
                                                 cb,
                                                 user_data);
 }
@@ -736,7 +734,6 @@ void signon_identity_store_credentials_with_args(SignonIdentity *self,
                                                  const gchar* const *realms,
                                                  const gchar* const *access_control_list,
                                                  SignonIdentityType type,
-                                                 gint ref_count,
                                                  SignonIdentityStoreCredentialsCb cb,
                                                  gpointer user_data)
 {
@@ -764,7 +761,6 @@ void signon_identity_store_credentials_with_args(SignonIdentity *self,
     operation_data->realms = g_strdupv((gchar **)realms);
     operation_data->access_control_list = g_strdupv((gchar **)access_control_list);
     operation_data->type = (gint)type;
-    operation_data->ref_count = ref_count;
     operation_data->cb_data = cb_data;
 
     identity_check_remote_registration (self);
@@ -818,7 +814,6 @@ identity_store_credentials_ready_cb (gpointer object, const GError *error, gpoin
                     (const char **)operation_data->realms,
                     (const char **)operation_data->access_control_list,
                     operation_data->type,
-                    operation_data->ref_count,
                     identity_store_credentials_reply,
                     cb_data);
     }
@@ -1511,6 +1506,54 @@ void signon_identity_signout(SignonIdentity *self,
                                     identity_object_quark(),
                                     identity_signout_ready_cb,
                                     cb_data);
+}
+
+/**
+ * signon_identity_add_reference:
+ * @reference: reference to be added
+ * @cb: callback
+ * @user_data : user_data.
+ *
+ * Adds named reference to identity
+ */
+void signon_identity_add_reference(SignonIdentity *self,
+                             const gchar *reference,
+                             SignonIdentityReferenceAddedCb cb,
+                             gpointer user_data)
+{
+    g_return_if_fail (SIGNON_IS_IDENTITY (self));
+
+    SignonIdentityPrivate *priv = self->priv;
+    g_return_if_fail (priv != NULL);
+
+    //TODO implement
+
+    if (cb)
+        (cb) (self, NULL, user_data);
+}
+
+/**
+ * signon_identity_remove_reference:
+ * @reference: reference to be removed
+ * @cb: callback
+ * @user_data : user_data.
+ *
+ * Removes named reference from identity
+ */
+void signon_identity_remove_reference(SignonIdentity *self,
+                             const gchar *reference,
+                             SignonIdentityReferenceRemovedCb cb,
+                             gpointer user_data)
+{
+    g_return_if_fail (SIGNON_IS_IDENTITY (self));
+
+    SignonIdentityPrivate *priv = self->priv;
+    g_return_if_fail (priv != NULL);
+
+    //TODO implement
+
+    if (cb)
+        (cb) (self, NULL, user_data);
 }
 
 /**
