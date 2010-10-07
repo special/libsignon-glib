@@ -1,3 +1,9 @@
+libsignon-glib (0.16-2) unstable; urgency=low
+
+  * Fixes: NB#178256 - Multiple AuthSessions for the same ID/method.
+
+ -- Alberto Mardegan <alberto.mardegan@nokia.com>  Thu, 07 Oct 2010 11:31:48 +0300
+
 libsignon-glib (0.16-1) unstable; urgency=low
 
   * Fixes: NB#195990 -  COREWEB: /usr/lib/telepathy/telepathy-sasl-signon...
