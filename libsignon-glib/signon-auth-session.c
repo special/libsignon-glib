@@ -486,15 +486,20 @@ auth_session_priv_init (SignonAuthSession *self, guint id,
     g_return_val_if_fail (SIGNON_IS_AUTH_SESSION (self), FALSE);
     SignonAuthSessionPrivate *priv = SIGNON_AUTH_SESSION_PRIV (self);
     g_return_val_if_fail (priv, FALSE);
+    gchar *path;
+    GError *error = NULL;
 
     priv->id = id;
     priv->method_name = g_strdup (method_name);
 
-    (void)com_nokia_SingleSignOn_AuthService_get_auth_session_object_path_async (DBUS_G_PROXY (priv->signon_proxy),
-                                                                                  (const guint)id,
-                                                                                  method_name,
-                                                                                  auth_session_get_object_path_reply,
-                                                                                  self);
+    com_nokia_SingleSignOn_AuthService_get_auth_session_object_path (DBUS_G_PROXY (priv->signon_proxy),
+        (const guint)id,
+         method_name,
+         &path,
+         &error);
+    auth_session_get_object_path_reply (DBUS_G_PROXY (priv->signon_proxy),
+                                        path, error, self);
+
     priv->busy = FALSE;
     priv->canceled = FALSE;
     return TRUE;
@@ -680,6 +685,7 @@ auth_session_check_remote_object(SignonAuthSession *self)
 
     g_return_if_fail (priv->signon_proxy != NULL);
 
+    g_warning("Getting another session! This shouldn't happen!");
     (void)com_nokia_SingleSignOn_AuthService_get_auth_session_object_path_async (DBUS_G_PROXY (priv->signon_proxy),
                                                                                   (const guint)priv->id,
                                                                                   priv->method_name,
