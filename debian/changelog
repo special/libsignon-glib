@@ -1,3 +1,9 @@
+libsignon-glib (0.18-1) unstable; urgency=low
+
+  * Don't build documentation for signon-proxy.
+
+ -- Alberto Mardegan <alberto.mardegan@nokia.com>  Mon, 25 Oct 2010 15:19:49 +0300
+
 libsignon-glib (0.17-1) unstable; urgency=low
 
   * Fixes: NB#198621 - libsignon-glib: Header not found in dev-pkg or its
