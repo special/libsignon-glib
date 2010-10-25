@@ -5,7 +5,9 @@ lib_LTLIBRARIES = \
 
 libsignon_glib_la_CFLAGS = $(DEPS_CFLAGS) -Wall -Werror
 libsignon_glib_la_LIBADD = $(DEPS_LIBS)
-libsignon_glib_la_LDFLAGS = -version-info 1:0:0
+libsignon_glib_la_LDFLAGS = \
+	-version-info 1:0:0 \
+	-export-symbols-regex '^signon_'
 
 BUILT_SOURCES = \
 	signon-marshal.c \
@@ -48,19 +50,22 @@ libsignon_glib_include_HEADERS = \
 DBUS_INTERFACES_DIR = /usr/share/dbus-1/interfaces
 
 signon-client-glib-gen.h: $(DBUS_INTERFACES_DIR)/com.nokia.SingleSignOn.AuthService.xml
-	dbus-binding-tool --prefix=signon-client-glib --mode=glib-client $< > $@
+	dbus-binding-tool --prefix=signon-client-glib --mode=glib-client $< \
+	| sed s/com_nokia_SingleSignOn/SSO/g > $@
 
 signon-auth-session-client-glib-gen.h: $(DBUS_INTERFACES_DIR)/com.nokia.SingleSignOn.AuthSession.xml
-	dbus-binding-tool --prefix=signon-auth-session-client-glib --mode=glib-client $< > $@
+	dbus-binding-tool --prefix=signon-auth-session-client-glib --mode=glib-client $< \
+	| sed s/com_nokia_SingleSignOn/SSO/g > $@
 
 signon-identity-glib-gen.h: $(DBUS_INTERFACES_DIR)/com.nokia.SingleSignOn.Identity.xml
-	dbus-binding-tool --prefix=signon-identity-glib --mode=glib-client $< > $@
+	dbus-binding-tool --prefix=signon-identity-glib --mode=glib-client $< \
+	| sed s/com_nokia_SingleSignOn/SSO/g > $@
 
 %-marshal.h: %-marshal.list Makefile
-	glib-genmarshal --header --prefix=$(subst -,_,$*)_marshal $< > $*-marshal.h
+	glib-genmarshal --header --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.h
 
 %-marshal.c: %-marshal.list Makefile
-	glib-genmarshal --body --prefix=$(subst -,_,$*)_marshal $< > $*-marshal.c
+	glib-genmarshal --body --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.c
 
 signon-enum-types.h: stamp-signon-enum-types.h
 	@true

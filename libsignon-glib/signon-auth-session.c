@@ -52,6 +52,8 @@ struct _SignonAuthSessionPrivate
     gint id;
     gchar *method_name;
 
+    DBusGProxyCall *pending_call_get_path;
+
     gboolean busy;
     gboolean canceled;
     gboolean dispose_has_run;
@@ -100,7 +102,7 @@ static void auth_session_state_changed_cb (DBusGProxy *proxy, gint state, gchar 
 static void auth_session_remote_object_destroyed_cb (DBusGProxy *proxy, gpointer user_data);
 
 static gboolean auth_session_priv_init (SignonAuthSession *self, guint id, const gchar *method_name, GError **err);
-static void auth_session_get_object_path_reply (DBusGProxy *proxy, char * object_path, GError *error, gpointer userdata);
+static void auth_session_get_object_path_reply (DBusGProxy *proxy, char *object_path, GError *error, gpointer userdata);
 
 static void auth_session_set_id_ready_cb (gpointer object, const GError *error, gpointer user_data);
 static void auth_session_query_available_mechanisms_ready_cb (gpointer object, const GError *error, gpointer user_data);
@@ -108,7 +110,7 @@ static void auth_session_process_ready_cb (gpointer object, const GError *error,
 static void auth_session_cancel_ready_cb (gpointer object, const GError *error, gpointer user_data);
 
 static void auth_session_query_mechanisms_reply (DBusGProxy *proxy, char **object_path, GError *error, gpointer userdata);
-static void auth_session_process_reply (DBusGProxy *proxy, GHashTable *object_path, GError *error, gpointer userdata);
+static void auth_session_process_reply (DBusGProxy *proxy, GHashTable *session_data, GError *error, gpointer userdata);
 
 static void auth_session_check_remote_object(SignonAuthSession *self);
 
@@ -165,7 +167,7 @@ signon_auth_session_dispose (GObject *object)
                                         G_CALLBACK (auth_session_remote_object_destroyed_cb),
                                         self);
 
-        com_nokia_SingleSignOn_AuthSession_object_unref (priv->proxy, &err);
+        SSO_AuthSession_object_unref (priv->proxy, &err);
         g_object_unref (priv->proxy);
 
         priv->proxy = NULL;
@@ -210,7 +212,7 @@ signon_auth_session_class_init (SignonAuthSessionClass *klass)
                           0,
                           NULL,
                           NULL,
-                          signon_marshal_VOID__INT_STRING,
+                          _signon_marshal_VOID__INT_STRING,
                           G_TYPE_NONE, 2,
                           G_TYPE_INT,
                           G_TYPE_STRING);
@@ -258,9 +260,7 @@ auth_session_set_id_ready_cb (gpointer object,
     gint id = GPOINTER_TO_INT(user_data);
 
     GError *err = NULL;
-    com_nokia_SingleSignOn_AuthSession_set_id (priv->proxy,
-                                                     id,
-                                                     &err);
+    SSO_AuthSession_set_id (priv->proxy, id, &err);
     priv->id = id;
 
     if (err)
@@ -378,7 +378,7 @@ signon_auth_session_cancel (SignonAuthSession *self)
 }
 
 static void
-auth_session_get_object_path_reply (DBusGProxy *proxy, char * object_path,
+auth_session_get_object_path_reply (DBusGProxy *proxy, char *object_path,
                                     GError *error, gpointer userdata)
 {
     g_return_if_fail (SIGNON_IS_AUTH_SESSION (userdata));
@@ -386,6 +386,7 @@ auth_session_get_object_path_reply (DBusGProxy *proxy, char * object_path,
     SignonAuthSessionPrivate *priv = self->priv;
     g_return_if_fail (priv != NULL);
 
+    priv->pending_call_get_path = NULL;
     if (!g_strcmp0(object_path, "") || error)
     {
         if (error)
@@ -399,7 +400,7 @@ auth_session_get_object_path_reply (DBusGProxy *proxy, char * object_path,
                                                    SIGNOND_AUTH_SESSION_INTERFACE,
                                                    object_path);
 
-        dbus_g_object_register_marshaller (signon_marshal_VOID__INT_STRING,
+        dbus_g_object_register_marshaller (_signon_marshal_VOID__INT_STRING,
                                            G_TYPE_NONE,
                                            G_TYPE_INT,
                                            G_TYPE_STRING,
@@ -490,11 +491,13 @@ auth_session_priv_init (SignonAuthSession *self, guint id,
     priv->id = id;
     priv->method_name = g_strdup (method_name);
 
-    (void)com_nokia_SingleSignOn_AuthService_get_auth_session_object_path_async (DBUS_G_PROXY (priv->signon_proxy),
-                                                                                  (const guint)id,
-                                                                                  method_name,
-                                                                                  auth_session_get_object_path_reply,
-                                                                                  self);
+    priv->pending_call_get_path =
+        SSO_AuthService_get_auth_session_object_path_async (
+            DBUS_G_PROXY (priv->signon_proxy),
+            (const guint)id,
+            method_name,
+            auth_session_get_object_path_reply,
+            self);
     priv->busy = FALSE;
     priv->canceled = FALSE;
     return TRUE;
@@ -522,7 +525,7 @@ auth_session_query_mechanisms_reply (DBusGProxy *proxy, char **object_path,
 }
 
 static void
-auth_session_process_reply (DBusGProxy *proxy, GHashTable *object_path,
+auth_session_process_reply (DBusGProxy *proxy, GHashTable *session_data,
                             GError *error, gpointer userdata)
 {
     GError *new_error = NULL;
@@ -535,7 +538,7 @@ auth_session_process_reply (DBusGProxy *proxy, GHashTable *object_path,
         new_error = _signon_errors_get_error_from_dbus (error);
 
     (cb_data->cb)
-        (cb_data->self, object_path, new_error, cb_data->user_data);
+        (cb_data->self, session_data, new_error, cb_data->user_data);
 
     cb_data->self->priv->busy = FALSE;
     if (new_error)
@@ -570,11 +573,11 @@ auth_session_query_available_mechanisms_ready_cb (gpointer object, const GError 
     else
     {
         g_return_if_fail (priv->proxy != NULL);
-        (void) com_nokia_SingleSignOn_AuthSession_query_available_mechanisms_async (
-                    priv->proxy,
-                    (const char **)operation_data->wanted_mechanisms,
-                    auth_session_query_mechanisms_reply,
-                    cb_data);
+        SSO_AuthSession_query_available_mechanisms_async (
+            priv->proxy,
+            (const char **)operation_data->wanted_mechanisms,
+            auth_session_query_mechanisms_reply,
+            cb_data);
 
         g_signal_emit (self,
                        auth_session_signals[STATE_CHANGED],
@@ -625,12 +628,11 @@ auth_session_process_ready_cb (gpointer object, const GError *error, gpointer us
     {
         g_return_if_fail (priv->proxy != NULL);
 
-        (void)com_nokia_SingleSignOn_AuthSession_process_async(
-                    priv->proxy,
-                    operation_data->session_data,
-                    operation_data->mechanism,
-                    auth_session_process_reply,
-                    cb_data);
+        SSO_AuthSession_process_async (priv->proxy,
+                                       operation_data->session_data,
+                                       operation_data->mechanism,
+                                       auth_session_process_reply,
+                                       cb_data);
 
        g_hash_table_destroy (operation_data->session_data);
 
@@ -662,7 +664,7 @@ auth_session_cancel_ready_cb (gpointer object, const GError *error, gpointer use
         DEBUG("error during initialization");
     }
     else if (priv->proxy && priv->busy)
-        com_nokia_SingleSignOn_AuthSession_cancel (priv->proxy, NULL);
+        SSO_AuthSession_cancel (priv->proxy, NULL);
 
     priv->busy = FALSE;
     priv->canceled = FALSE;
@@ -680,9 +682,14 @@ auth_session_check_remote_object(SignonAuthSession *self)
 
     g_return_if_fail (priv->signon_proxy != NULL);
 
-    (void)com_nokia_SingleSignOn_AuthService_get_auth_session_object_path_async (DBUS_G_PROXY (priv->signon_proxy),
-                                                                                  (const guint)priv->id,
-                                                                                  priv->method_name,
-                                                                                  auth_session_get_object_path_reply,
-                                                                                  self);
+    if (priv->pending_call_get_path == NULL)
+    {
+        priv->pending_call_get_path =
+            SSO_AuthService_get_auth_session_object_path_async (DBUS_G_PROXY (priv->signon_proxy),
+               (const guint)priv->id,
+               priv->method_name,
+               auth_session_get_object_path_reply,
+               self);
+    }
 }
+

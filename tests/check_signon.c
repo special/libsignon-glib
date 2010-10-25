@@ -26,7 +26,7 @@ static GMainLoop *main_loop = NULL;
 static SignonIdentity *identity = NULL;
 static SignonAuthService *auth_service = NULL;
 
-#define SIGNOND_IDLE_TIMEOUT (5 * 60 + 10)
+#define SIGNOND_IDLE_TIMEOUT (5 + 2)
 
 static void
 end_test ()
@@ -55,6 +55,9 @@ START_TEST(test_init)
 {
     g_type_init ();
 
+    g_debug("%s", G_STRFUNC);
+    system ("killall -9 signond");
+    system ("SSO_IDENTITY_TIMEOUT=5 SSO_AUTHSESSION_TIMEOUT=5 signond &");
     auth_service = signon_auth_service_new ();
     main_loop = g_main_loop_new (NULL, FALSE);
 
@@ -98,6 +101,7 @@ START_TEST(test_query_methods)
 {
     g_type_init ();
 
+    g_debug("%s", G_STRFUNC);
     if(!main_loop)
         main_loop = g_main_loop_new (NULL, FALSE);
 
@@ -150,6 +154,7 @@ START_TEST(test_query_mechanisms)
 {
     g_type_init ();
 
+    g_debug("%s", G_STRFUNC);
     auth_service = signon_auth_service_new ();
 
     fail_unless (SIGNON_IS_AUTH_SERVICE (auth_service),
@@ -211,6 +216,7 @@ START_TEST(test_auth_session_query_mechanisms)
 
     GError *err = NULL;
 
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL, "Cannot create Iddentity object");
 
@@ -285,6 +291,7 @@ START_TEST(test_auth_session_query_mechanisms_nonexisting)
     g_type_init();
     GError *err = NULL;
 
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL, "Cannot create Iddentity object");
 
@@ -365,6 +372,7 @@ START_TEST(test_auth_session_creation)
     g_type_init();
     GError *err = NULL;
 
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL, "Cannot create Iddentity object");
 
@@ -391,6 +399,7 @@ START_TEST(test_auth_session_process)
     gint state_counter = 0;
     GError *err = NULL;
 
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL, "Cannot create Iddentity object");
 
@@ -501,6 +510,7 @@ new_identity()
     guint id = 0;
     GError *error = NULL;
 
+    g_debug("%s", G_STRFUNC);
     connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
 
     if(connection)
@@ -518,7 +528,7 @@ new_identity()
     }
 
     gchar *objectPath;
-    com_nokia_SingleSignOn_AuthService_register_new_identity (proxy, &objectPath, &error);
+    SSO_AuthService_register_new_identity (proxy, &objectPath, &error);
 
     if (error)
     {
@@ -534,18 +544,18 @@ new_identity()
                                        objectPath,
                                        "com.nokia.SingleSignOn.Identity");
 
-    com_nokia_SingleSignOn_Identity_store_credentials (proxy,
-                                                             0,
-                                                             "James Bond",
-                                                             "007",
-                                                             1,
-                                                             methods,
-                                                             "caption",
-                                                             NULL,
-                                                             NULL,
-                                                             0,
-                                                             &id,
-                                                             &error);
+    SSO_Identity_store_credentials (proxy,
+                                    0,
+                                    "James Bond",
+                                    "007",
+                                    1,
+                                    methods,
+                                    "caption",
+                                    NULL,
+                                    NULL,
+                                    0,
+                                    &id,
+                                    &error);
 
     g_hash_table_destroy (methods);
 
@@ -570,6 +580,7 @@ START_TEST(test_get_existing_identity)
 {
     g_type_init ();
 
+    g_debug("%s", G_STRFUNC);
     guint id = new_identity();
 
     fail_unless (id != 0);
@@ -592,6 +603,7 @@ START_TEST(test_get_nonexisting_identity)
 {
     g_type_init ();
 
+    g_debug("%s", G_STRFUNC);
     identity = signon_identity_new_from_db(G_MAXINT);
 
     fail_unless (identity != NULL);
@@ -645,6 +657,7 @@ static void store_credentials_identity_cb(SignonIdentity *self,
 START_TEST(test_store_credentials_identity)
 {
     g_type_init ();
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL);
     fail_unless (SIGNON_IS_IDENTITY (idty),
@@ -701,6 +714,7 @@ static void identity_verify_username_cb(SignonIdentity *self,
 START_TEST(test_verify_secret_identity)
 {
     g_type_init ();
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new(NULL, NULL);
     fail_unless (idty != NULL);
     fail_unless (SIGNON_IS_IDENTITY (idty),
@@ -766,6 +780,7 @@ static void identity_remove_cb(SignonIdentity *self, const GError *error, gpoint
 START_TEST(test_remove_identity)
 {
     g_type_init ();
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new();
     fail_unless (idty != NULL);
     fail_unless (SIGNON_IS_IDENTITY (idty),
@@ -884,6 +899,7 @@ static void identity_info_cb(SignonIdentity *self, const SignonIdentityInfo *inf
 
 static SignonIdentityInfo *create_standard_info()
 {
+    g_debug("%s", G_STRFUNC);
     SignonIdentityInfo *info = signon_identity_info_new ();
     signon_identity_info_set_username (info, "James Bond");
     signon_identity_info_set_secret (info, "007", TRUE);
@@ -905,6 +921,7 @@ static SignonIdentityInfo *create_standard_info()
 
 START_TEST(test_info_identity)
 {
+    g_debug("%s", G_STRFUNC);
     g_type_init ();
     SignonIdentity *idty = signon_identity_new();
     fail_unless (idty != NULL);
@@ -1018,6 +1035,7 @@ static void identity_signout_signal_cb (gpointer instance, gpointer user_data)
 
 START_TEST(test_signout_identity)
 {
+    g_debug("%s", G_STRFUNC);
     g_type_init ();
     SignonIdentity *idty = signon_identity_new();
     fail_unless (idty != NULL);
@@ -1074,6 +1092,7 @@ END_TEST
 START_TEST(test_unregistered_identity)
 {
     g_type_init ();
+    g_debug("%s", G_STRFUNC);
     SignonIdentity *idty = signon_identity_new();
     fail_unless (idty != NULL);
     fail_unless (SIGNON_IS_IDENTITY (idty),
@@ -1109,6 +1128,7 @@ END_TEST
 
 START_TEST(test_unregistered_auth_session)
 {
+    g_debug("%s", G_STRFUNC);
     g_type_init ();
     SignonIdentity *idty = signon_identity_new();
     fail_unless (idty != NULL);
