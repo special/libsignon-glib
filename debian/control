@@ -31,7 +31,7 @@ Description: Maemo SignOn library (glib). Debug symbols
 Package: libsignon-glib-dev
 Architecture: any
 Section: libdevel
-Depends: libsignon-glib1 (= ${binary:Version})
+Depends: libsignon-glib1 (= ${binary:Version}), signond-dev
 Description: Development files for the Maemo SignOn library (glib)
  A low-level library for managing account credentials.
  .
