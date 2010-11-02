@@ -1,3 +1,9 @@
+libsignon-glib (0.19-1) unstable; urgency=low
+
+  * Fixes NB#188172 - libsignon-glib1-test tests fail
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Tue, 2 Nov 2010 11:40:50 +0300
+
 libsignon-glib (0.18-1) unstable; urgency=low
 
   * Don't build documentation for signon-proxy.
