@@ -9,13 +9,13 @@ Build-Depends: debhelper (>= 4.1.0),
                libglib2.0-dev,
                libdbus-1-dev,
                libdbus-glib-1-dev,
-               signond-dev
+               signond-dev (>= 6.1)
 Standards-Version: 3.6.0
 
 Package: libsignon-glib1
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}, ${misc:depends}, signond0
+Depends: ${shlibs:Depends}, ${misc:depends}, signond
 Description: Maemo SignOn library (glib)
  A low-level library for managing account credentials.
 
