@@ -11,7 +11,8 @@ PKG_CHECK_MODULES(
 	gobject-2.0
         dbus-1
         dbus-glib-1
-        signond);
+        signond
+        libsignoncrypto-qt);
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 

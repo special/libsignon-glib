@@ -39,6 +39,7 @@
 #include "signon-dbus-queue.h"
 #include "signon-utils.h"
 #include "signon-errors.h"
+#include <SignOnCrypto/encryptor_glib.h>
 
 G_DEFINE_TYPE (SignonIdentity, signon_identity, G_TYPE_OBJECT);
 
@@ -755,7 +756,7 @@ void signon_identity_store_credentials_with_args(SignonIdentity *self,
     IdentityStoreCredentialsData *operation_data = g_slice_new0 (IdentityStoreCredentialsData);
 
     operation_data->username = g_strdup (username);
-    operation_data->secret = g_strdup (secret);
+    signon_encrypt_string (secret, &operation_data->secret, 0);
     operation_data->store_secret = store_secret;
     operation_data->methods = identity_methods_to_valuearray (methods);
     operation_data->caption = g_strdup (caption);
@@ -1038,11 +1039,16 @@ void signon_identity_verify_secret(SignonIdentity *self,
                                   SignonIdentityVerifyCb cb,
                                   gpointer user_data)
 {
+    gchar *encrypted_secret = NULL;
+    signon_encrypt_string (secret, &encrypted_secret, 0);
+
     identity_verify_data (self,
-                          secret,
+                          encrypted_secret,
                           SIGNON_VERIFY_SECRET,
                           cb,
                           user_data);
+
+    g_free(encrypted_secret);
 }
 
 static void
