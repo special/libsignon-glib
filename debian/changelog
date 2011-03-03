@@ -1,3 +1,9 @@
+libsignon-glib (0.21-2) unstable; urgency=low
+
+  * Fixes NB#228755 - libsignon-glib provides dev package with missing dependencies 
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Thu, 03 Mar 2011 10:55:50 +0300
+
 libsignon-glib (0.21-1) unstable; urgency=low
 
   * Adapt to verifyUser dbus signature change.
