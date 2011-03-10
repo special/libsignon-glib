@@ -1,3 +1,9 @@
+libsignon-glib (0.22-1) unstable; urgency=low
+
+  * Fixes NB#230136 - Password prompt disappears, while the user tries to enter his password.
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Thu, 10 Mar 2011 14:25:50 +0300
+
 libsignon-glib (0.21-2) unstable; urgency=low
 
   * Fixes NB#228755 - libsignon-glib provides dev package with missing dependencies 
