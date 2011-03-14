@@ -1,3 +1,9 @@
+libsignon-glib (0.23-1) unstable; urgency=low
+
+  * Fixes NB#230915 - [Hamsin-IM] Accounts do not go online if on a subsequent offline/online action after configuration
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Mon, 14 Mar 2011 11:25:50 +0300
+
 libsignon-glib (0.22-1) unstable; urgency=low
 
   * Fixes NB#230136 - Password prompt disappears, while the user tries to enter his password.
