@@ -25,6 +25,8 @@ AC_PROG_LIBTOOL
 
 GTK_DOC_CHECK([1.3])
 
+AM_CONDITIONAL(GENERATE_DOCS, [test x"$NO_DOCS" != xyes])
+
 AC_ARG_ENABLE(cast-checks,  [  --disable-cast-checks   compile with GLIB cast checks disabled],[cchecks=${enableval}],cchecks=yes)
 if test "x$cchecks" = "xno"; then
     CFLAGS="$CFLAGS -DG_DISABLE_CAST_CHECKS"
