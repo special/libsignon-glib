@@ -1,3 +1,9 @@
+libsignon-glib (0.23-2) unstable; urgency=low
+
+  * Fixes NB#224780 - Source packages still generating -docs packages for arm targets
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Tue, 05 Apr 2011 14:05:50 +0300
+
 libsignon-glib (0.23-1) unstable; urgency=low
 
   * Fixes NB#230915 - [Hamsin-IM] Accounts do not go online if on a subsequent offline/online action after configuration
