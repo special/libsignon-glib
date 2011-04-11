@@ -1,3 +1,9 @@
+libsignon-glib (0.23-4) unstable; urgency=low
+
+  * Broken test commented out
+	
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Mon, 11 Apr 2011 11:05:50 +0300
+
 libsignon-glib (0.23-3) unstable; urgency=low
 
   * Fixes: NB#224780 - Source packages still generating -docs packages for arm targets
