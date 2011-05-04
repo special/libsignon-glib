@@ -1,3 +1,9 @@
+libsignon-glib (0.24-2) unstable; urgency=low
+
+  * Add missing libsignoncrypto-qt build-dependency.
+
+ -- Alberto Mardegan <alberto.mardegan@nokia.com>  Wed, 04 May 2011 15:36:30 +0300
+
 libsignon-glib (0.24-1) unstable; urgency=low
 
   * Encrypt D-Bus messages using libsignoncrypto-qt.
