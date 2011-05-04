@@ -32,6 +32,9 @@
 #include "signon-utils.h"
 #include <SignOnCrypto/encryptor_glib.h>
 
+/* SignonAuthSessionState is defined in signoncommon.h */
+#include <signoncommon.h>
+
 G_DEFINE_TYPE (SignonAuthSession, signon_auth_session, G_TYPE_OBJECT);
 
 /* Signals */
