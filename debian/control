@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 4.1.0),
                libglib2.0-dev,
                libdbus-1-dev,
                libdbus-glib-1-dev,
-               libsignoncrypto-qt-dev,
+               libsignoncrypto-qt-dev (>= 0.12-2),
                signond-dev (>= 6.1)
 Standards-Version: 3.6.0
 
