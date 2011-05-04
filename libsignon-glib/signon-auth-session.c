@@ -30,7 +30,7 @@
 #include "signon-marshal.h"
 #include "signon-proxy.h"
 #include "signon-utils.h"
-#include <SignOnCrypto/encryptor_glib.h>
+#include <SignOnCrypto/encryptor-glib.h>
 
 /* SignonAuthSessionState is defined in signoncommon.h */
 #include <signoncommon.h>

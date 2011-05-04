@@ -39,7 +39,7 @@
 #include "signon-dbus-queue.h"
 #include "signon-utils.h"
 #include "signon-errors.h"
-#include <SignOnCrypto/encryptor_glib.h>
+#include <SignOnCrypto/encryptor-glib.h>
 
 G_DEFINE_TYPE (SignonIdentity, signon_identity, G_TYPE_OBJECT);
 
