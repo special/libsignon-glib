@@ -1,3 +1,12 @@
+libsignon-glib (0.24-1) unstable; urgency=low
+
+  * Encrypt D-Bus messages using libsignoncrypto-qt.
+  * Fixes: NB#250941 - libsignon-glib has dependency on QVariant in the
+    language is C++.
+  * Fixes: NB#251143 - Need a way to invoke password dialog in libsignon-glib.
+
+ -- Alberto Mardegan <alberto.mardegan@nokia.com>  Wed, 04 May 2011 14:45:06 +0300
+
 libsignon-glib (0.23-4) unstable; urgency=low
 
   * Broken test commented out
