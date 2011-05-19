@@ -562,26 +562,29 @@ auth_session_process_reply (DBusGProxy *proxy, GHashTable *session_data,
 {
     GError *new_error = NULL;
     AuthSessionProcessCbData *cb_data = (AuthSessionProcessCbData *)userdata;
+    GHashTable *decrypted_data = NULL;
+
     g_return_if_fail (cb_data != NULL);
     g_return_if_fail (cb_data->self != NULL);
     g_return_if_fail (cb_data->self->priv != NULL);
 
-    if (error)
+    if (G_UNLIKELY (error))
         new_error = _signon_errors_get_error_from_dbus (error);
-
-    GHashTable *decrypted_data = NULL;
-    if (session_data != NULL) {
-        decrypted_data =
-            g_hash_table_new_full (g_str_hash, g_str_equal,
-                                   g_free, signon_free_gvalue);
-        signon_decrypt_hash_table (session_data, decrypted_data, 0);
+    else
+    {
+        if (session_data != NULL) {
+            decrypted_data =
+                g_hash_table_new_full (g_str_hash, g_str_equal,
+                                       g_free, signon_free_gvalue);
+            signon_decrypt_hash_table (session_data, decrypted_data, 0);
+        }
     }
 
     (cb_data->cb)
         (cb_data->self, decrypted_data, new_error, cb_data->user_data);
 
     if (decrypted_data != NULL)
-        g_hash_table_destroy(session_data);
+        g_hash_table_unref (session_data);
 
     cb_data->self->priv->busy = FALSE;
     if (new_error)
