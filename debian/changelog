@@ -1,3 +1,9 @@
+libsignon-glib (1.0-1) unstable; urgency=low
+
+  * UNRELEASED
+
+ -- Tomi Suviola <tomi.suviola@nokia.com>  Tue, 26 Jul 2011 14:47:16 +0300
+
 libsignon-glib (0.24-4) unstable; urgency=low
 
   * Fixes: NB#256479 - Signon-glib library crash in the case of canceling the
