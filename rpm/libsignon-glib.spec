@@ -58,7 +58,7 @@ Group: Documentation
 %{_datadir}/gtk-doc/html/libsignon-glib/*
 
 %prep
-%setup -q -n %{name}-%{version}/libsignon-glib
+%setup -q -n %{name}-%{version}/mer-libsignon-glib
 
 %build
 %reconfigure
