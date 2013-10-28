@@ -52,8 +52,13 @@ AS_IF([test "x$have_check" = "xyes"],
     [AC_MSG_ERROR([tests enabled but required dependencies were not found])])])
 
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$have_check" = "xyes"])
+AM_CONDITIONAL(ENABLE_GTK_DOC, test "x$enable_gtk_doc" = xyes)
+AM_CONDITIONAL(DISABLE_GTK_DOC, test "x$disable_gtk_doc" = xno)
 
-GTK_DOC_CHECK([1.14], [--flavour no-tmpl])
+
+m4_ifdef([GTK_DOC_CHECK], [
+ GTK_DOC_CHECK([1.17],[--flavour no-tmpl])
+])
 
 AC_ARG_ENABLE([cast-checks],
     [AS_HELP_STRING([--disable-cast-checks], [compile with GLib cast checks disabled])])

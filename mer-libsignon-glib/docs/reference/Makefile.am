@@ -74,6 +74,7 @@ AM_CPPFLAGS=$(DEPS_CFLAGS)
 GTKDOC_LIBS=$(top_builddir)/libsignon-glib/libsignon-glib.la $(DEPS_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
+CLEANFILES = 
 include $(top_srcdir)/gtk-doc.make
 
 # Other files to distribute
