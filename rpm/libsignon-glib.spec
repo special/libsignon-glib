@@ -27,7 +27,6 @@ Requires: signon-qt5
 %defattr(-,root,root,-)
 %{_libdir}/libsignon-glib.so.*
 %{_datadir}/vala/vapi/signon.vapi
-%exclude /usr/doc/reference/*
 
 %package devel
 Summary: Development files for libsignon-glib
@@ -46,22 +45,16 @@ Requires: signon-qt5-devel
 %{_includedir}/libsignon-glib/*.h
 %{_libdir}/pkgconfig/libsignon-glib.pc
 
-%package docs
-Summary: Documentation for libsignon-glib
-Group: Documentation
-
-%description docs
-%{summary}
-
-%files docs
-%defattr(-,root,root,-)
-%{_datadir}/gtk-doc/html/libsignon-glib/*
-
 %prep
 %setup -q -n %{name}-%{version}/mer-libsignon-glib
 
 %build
-%reconfigure
+%autogen --disable-static \
+         --disable-gtk-doc \
+         --disable-man \
+         --with-testdir=/opt/tests/libaccounts-glib \
+         --with-testdatadir=/opt/tests/libaccounts-glib/data
+
 # %{?jobs:-j%jobs} disabled to fix errors with xgen-getc
 make
 
